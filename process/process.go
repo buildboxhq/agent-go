@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/buildkite/agent/v3/experiments"
 	"github.com/buildkite/agent/v3/logger"
 	"github.com/pkg/errors"
 )
@@ -249,12 +250,18 @@ func (p *Process) Run() error {
 	}
 
 	// Find the exit status or terminating signal of the script
+	exitStatus := "nil"
 	exitSignal := "nil"
+
+	if !experiments.IsEnabled(`no-fake-exits`) || p.status.Exited() {
+		exitStatus = fmt.Sprintf("%d", p.status.ExitStatus())
+	}
+
 	if p.status.Signaled() {
 		exitSignal = SignalString(p.status.Signal())
 	}
-	p.logger.Info("Process with PID: %d finished with Exit Status: %d, Signal: %s",
-		p.pid, p.status.ExitStatus(), exitSignal)
+
+	p.logger.Info("Process with PID: %d finished with Exit Status: %s, Signal: %s", p.pid, exitStatus, exitSignal)
 
 	// Sometimes (in docker containers) io.Copy never seems to finish. This is a mega
 	// hack around it. If it doesn't finish after 1 second, just continue.
