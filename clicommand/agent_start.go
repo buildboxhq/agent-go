@@ -80,6 +80,7 @@ type AgentStartConfig struct {
 	NoPlugins                  bool     `cli:"no-plugins"`
 	NoPluginValidation         bool     `cli:"no-plugin-validation"`
 	NoPTY                      bool     `cli:"no-pty"`
+	RequirePluginDigests       bool     `cli:"require-plugin-digests"`
 	TimestampLines             bool     `cli:"timestamp-lines"`
 	HealthCheckAddr            string   `cli:"health-check-addr"`
 	MetricsDatadog             bool     `cli:"metrics-datadog"`
@@ -366,6 +367,11 @@ var AgentStartCommand = cli.Command{
 			EnvVar: "BUILDKITE_NO_GIT_SUBMODULES,BUILDKITE_DISABLE_GIT_SUBMODULES",
 		},
 		cli.BoolFlag{
+			Name:   "require-plugin-digests",
+			Usage:  "Require all plugins to be pinned to a version and digest",
+			EnvVar: "BUILDKITE_REQUIRE_PLUGIN_DIGESTS",
+		},
+		cli.BoolFlag{
 			Name:   "metrics-datadog",
 			Usage:  "Send metrics to DogStatsD for Datadog",
 			EnvVar: "BUILDKITE_METRICS_DATADOG",
@@ -578,6 +584,7 @@ var AgentStartCommand = cli.Command{
 			CommandEval:                !cfg.NoCommandEval,
 			PluginsEnabled:             !cfg.NoPlugins,
 			PluginValidation:           !cfg.NoPluginValidation,
+			RequirePluginDigests:       cfg.RequirePluginDigests,
 			LocalHooksEnabled:          !cfg.NoLocalHooks,
 			RunInPty:                   !cfg.NoPTY,
 			TimestampLines:             cfg.TimestampLines,
